@@ -1,0 +1,57 @@
+4.1
+Alociranje memorije za pb
+	call	ASE__Znwj - poziv za alociranje memorije na heapu, možemo reći ključna riječ new
+	mov	ebx, eax
+	mov	ecx, ebx
+	call	__ZN9CoolClassC1Ev - Pozivanje konstruktora
+
+Alociranje memorije za poc
+	sub	esp, 32 - Alociranje mjesta na stogu za objekt prije poziva main metode.
+	call	___main
+	
+4.2
+Memorija za objekt poc se alocira na stogu jer nismo išli ključnom riječi new te se zbog toga ne alocira mjesto na heapu .
+Memorija za objekt pb se alocira na heapu jer smo alocirali pomoću new.
+
+4.3
+Za poc ne postoji poziv konstruktora
+4.4
+	call	__ZN9CoolClassC1Ev -- Poziv konstruktora CoolClass
+	Nakon toga se obavljaju kućanski poslovi, te se poziva bazni konstruktor.
+	On postavlja pokazivac na virtualnu tablicu od baznog razreda .
+	Nakon toga se vraća u konstruktor od CoolClass te se prebriše vrijednost pokazivača sa pokazivačem na virtualnu tablicu od CoolClass.
+	
+4.5
+Sljedeći dio koda je poziv funkcije poc.set(42);
+	lea	eax, [ebp-16]
+	mov	DWORD PTR [esp], 42
+	mov	ecx, eax
+	call	__ZN13PlainOldClass3setEi
+	
+Sljedeći dio koda je poziv virtualne funkcije set od pb. Odnosno pb->set(42);
+	mov	eax, DWORD PTR [ebp-12]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, DWORD PTR [eax]
+	mov	eax, DWORD PTR [ebp-12]
+	mov	DWORD PTR [esp], 42
+	mov	ecx, eax
+	call	edx
+
+Razlika između 2 poziva je u tome što kod virtualnih fja pristupamo virtualnoj tablici.
+A kod ne virtualnih dohvaćamo referencu an objekt te pozivamo metodu pomoću call	__ZN13PlainOldClass3setEi.
+Kod prvog poziva bi se mogao dogodit tkzv inlining.
+Kao što vidimo poziv virtualne funkcije je skuplji.
+4.6
+Tehnički 2 puta se tu postavlja pokazivač na virtualnu tablicu. Prvo se uđe u konstruktor u CoolClass koji odmah ulazi u konstruktor Base
+U Base razredu se pomoću sljedećih naredbi postavlja pokazivač na virtualnu tablicu
+	mov	DWORD PTR [ebp-4], ecx
+	mov	edx, OFFSET FLAT:__ZTV4Base+8
+	mov	eax, DWORD PTR [ebp-4]
+	mov	DWORD PTR [eax], edx
+
+Nakon toga se vraća u konstruktor od CoolClass te se postavlja novi pokazival na virtualnu tablicu
+	mov	edx, OFFSET FLAT:__ZTV9CoolClass+8
+	mov	eax, DWORD PTR [ebp-12]
+	mov	DWORD PTR [eax], edx
+	
+Znači prvo smo postavili pokazivač virtualne tablice od Base a onda smo je prebrisali sa pokazivačem na virtualnu tablicu od CoolClass

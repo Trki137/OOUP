@@ -1,0 +1,30 @@
+Ispis:
+
+Metoda kaze: ja sam bazna implementacija!
+Metoda kaze: ja sam izvedena implementacija!
+Metoda kaze: ja sam izvedena implementacija!
+
+Znači prvi pozivu konstruktora Derived događa se sljedeće:
+	- Prije nego što se postavi pokazivač na virtualnu tablicu za razred Derived, pozove se konstruktor roditelja
+	- U baznom konstruktoru sljedeći dio koda postavlja pokazivač na virtualnu tablicu od razreda Base
+		mov	edx, OFFSET FLAT:__ZTV4Base+8
+		mov	eax, DWORD PTR [ebp-12]
+		mov	DWORD PTR [eax], edx
+		mov	eax, DWORD PTR [ebp-12]
+	- call	__ZN4Base6metodaEv sa ovime se poziva metoda().
+	-Ona će ispisati Metoda kaze te će onda pomoću pokazivača na virtualnu tablicu pozvati virtualnu metodu i proslijediti this.
+		mov	eax, DWORD PTR [ebp-12]
+		mov	eax, DWORD PTR [eax]
+		mov	eax, DWORD PTR [eax]
+		mov	edx, DWORD PTR [ebp-12]
+		mov	ecx, edx
+		call	eax
+	-Ali pošto pokazivač pokazuje na virtualnu tablicu od Base ona će ispisati "ja sam bazna implementacija"
+	-Nakon toga svega se vraća u konstruktor od Derived te se postavlja pokazivač na virtualnu tablicu od Derived
+		mov	edx, OFFSET FLAT:__ZTV7Derived+8
+		mov	eax, DWORD PTR [ebp-12]
+		mov	DWORD PTR [eax], edx
+		mov	eax, DWORD PTR [ebp-12]
+		mov	ecx, eax
+	- I onda call	__ZN4Base6metodaEv te je ostatak isti kao prethodni samo je drugi pokazivač
+	

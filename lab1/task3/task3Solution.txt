@@ -1,0 +1,13 @@
+sizeof(CoolClass) = 16 bytes.
+sizeof(PlainOldClass) = 4 bytes.
+
+Prvo što moramo znati da radim na 64 bitnoj arhitekturi i veličina pokazivača je 8 bajtova.
+Jasno je zašt je sizeof(PlainOldClass) 4 bajta. Nema virtualnih metoda te neće sadržavat niti pokazivač na virtualnu tablicu.
+Pa nam onda ostaje samo int x_ što nam je veličine 4 bajta.
+
+Kod CoolClass je malo drukčija priča jel ona ima 2 virtualne metode te će zbog toga imat i pokazivač na virtualnu tablicu.
+E sad imamo int variablu koja je 4 bajta i pokazivač koji je 8 bajta i na kraju ispadne da je sizeof(CoolClass) = 16 bajtova.
+Pa to je zbog optimizacije, odnosno takozvanog data aligment.
+Pristup podatcima se dohvaća u fiksnoj veličini koju zovemo riječ. U 64 bitnoj arhitekturi ona iznosi 8 bajtova.
+I sad da ne bi procesor morao radit dodatne operacije, koje koštaju procesora određeni dio instrukcija, onda ako nedostaju bajtovi da se nadopuni do cijele riječi on sam doda taj padding kako bi lako mogao doći do podatka.
+Te pošto je int 4 bajta i pointer 8 bajta on je nadodao na int još 4 dodatna bajta te je tbog toga sizeof(CoolClass) = 16;
